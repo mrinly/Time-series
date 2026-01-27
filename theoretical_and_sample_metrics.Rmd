@@ -1,0 +1,206 @@
+---
+title: "Homework2"
+output:
+  word_document: default
+  latex_engine: xelatex
+  html_document: default
+  pdf_document: default
+date: "2026-01-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+suppressPackageStartupMessages({
+  library("TSA")
+  library("forecast")
+  library("urca")
+  library("tseries")
+  library("lmtest")
+  library("astsa")
+  library("seasonal")
+  
+})
+options(scipen = 1000)
+```
+
+```{r}
+ma <- arima.sim(list(ma=c(1.5, -0.6)), sd=0.05, n=500)+0.05
+ts.plot(
+  ma,
+  main = expression(MA(2)~process:~~Y[t] == 0.05 + ε[t] + 1.5~ε[t-1] - 0.6~ε[t-2]),
+  ylab = expression(Y[t]),
+  xlab = expression(Time~t)
+)
+```
+
+```{r}
+set.seed(123)
+ma_100 <- arima.sim(list(ma = c(1.5, -0.6)), n = 100, sd = 0.05) + 0.05
+ma_500 <- arima.sim(list(ma = c(1.5, -0.6)), n = 500, sd = 0.05) + 0.05
+ma_1000 <- arima.sim(list(ma = c(1.5, -0.6)), n = 1000, sd = 0.05) + 0.05
+ma_10000  <- arima.sim(list(ma = c(1.5, -0.6)), n = 10000, sd = 0.05) + 0.05
+
+```
+
+```{r}
+acf_100 <- acf(ma_100, plot = FALSE)
+acf_500 <- acf(ma_500, plot = FALSE)
+acf_1000 <- acf(ma_1000, plot = FALSE)
+acf_10000 <- acf(ma_10000, plot = FALSE)
+
+acf_100_cov <- acf(ma_100, plot = FALSE, type='covariance')
+acf_500_cov <- acf(ma_500, plot = FALSE, type='covariance')
+acf_1000_cov <- acf(ma_1000, plot = FALSE, type='covariance')
+acf_10000_cov <- acf(ma_10000, plot = FALSE, type='covariance')
+
+plot(acf_100, 
+     ylim = c(-0.2, 0.2),
+     main = "ACF for n = 100",
+     ci = 0.95)
+```
+```{r}
+plot(acf_100_cov, 
+     ylim = c(-0.002, 0.002),
+     main = "ACF (cov) for n = 100",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_500, 
+     ylim = c(-0.2, 0.2),
+     main = "ACF for n = 500",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_500_cov, 
+     ylim = c(-0.002, 0.002),
+     main = "ACF (cov) for n = 500",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_1000, 
+     ylim = c(-0.2, 0.2),
+     main = "ACF for n = 1000",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_1000_cov, 
+     ylim = c(-0.002, 0.002),
+     main = "ACF (cov) for n = 1000",
+     ci = 0.95)
+```
+```{r}
+plot(acf_10000, 
+     ylim = c(-0.2, 0.2),
+     main = "ACF for n = 10000",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_10000_cov, 
+     ylim = c(-0.002, 0.002),
+     main = "ACF (cov) for n = 10000",
+     ci = 0.95)
+```
+
+
+```{r}
+Box.test(ma_1000, lag = 10, type = "Box-Pierce")
+Box.test (ma_1000, lag = 10, type = "Ljung-Box")
+```
+
+```{r}
+ar <- arima.sim(list(ar = c(0.6, -0.2)), sd = 0.04, n = 1000) + 0.1
+
+ts.plot(
+  ar,
+  main = expression(AR(2)~process:~~Y[t] == 0.1 + 0.6~Y[t-1] - 0.2~Y[t-2] + ε[t]),
+  ylab = expression(Y[t]),
+  xlab = expression(Time~t)
+)
+```
+
+```{r}
+set.seed(123)
+ar_100 <- arima.sim(list(ar = c(0.6, -0.2)), n = 100, sd = 0.04) + 0.1
+ar_500 <- arima.sim(list(ar = c(0.6, -0.2)), n = 500, sd = 0.04) + 0.1
+ar_1000 <- arima.sim(list(ar = c(0.6, -0.2)), n = 1000, sd = 0.04) + 0.1
+ar_10000 <- arima.sim(list(ar = c(0.6, -0.2)), n = 10000, sd = 0.04) + 0.1
+```
+
+```{r}
+acf_100_ar <- acf(ar_100, plot = FALSE)
+acf_500_ar <- acf(ar_500, plot = FALSE)
+acf_1000_ar <- acf(ar_1000, plot = FALSE)
+acf_10000_ar <- acf(ar_10000, plot = FALSE)
+
+acf_100_ar_cov <- acf(ar_100, plot = FALSE, type='covariance')
+acf_500_ar_cov <- acf(ar_500, plot = FALSE, type='covariance')
+acf_1000_ar_cov <- acf(ar_1000, plot = FALSE, type='covariance')
+acf_10000_ar_cov <- acf(ar_10000, plot = FALSE, type='covariance')
+
+plot(acf_100_ar, 
+     ylim = c(-0.6, 0.6),
+     main = "ACF for n = 100",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_100_ar_cov, 
+     ylim = c(-0.003, 0.003),
+     main = "ACF (cov) for n = 100",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_500_ar, 
+     ylim = c(-0.6, 0.6),
+     main = "ACF for n = 500",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_500_ar_cov, 
+     ylim = c(-0.003, 0.003),
+     main = "ACF (cov) for n = 500",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_1000_ar, 
+     ylim = c(-0.6, 0.6),
+     main = "ACF for n = 1000",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_1000_ar_cov, 
+     ylim = c(-0.003, 0.003),
+     main = "ACF (cov) for n = 1000",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_10000_ar, 
+     ylim = c(-0.6, 0.6),
+     main = "ACF for n = 10000",
+     ci = 0.95)
+```
+
+```{r}
+plot(acf_10000_ar_cov, 
+     ylim = c(-0.003, 0.003),
+     main = "ACF (cov) for n = 10000",
+     ci = 0.95)
+```
+
+```{r}
+Box.test(ar_1000, lag = 10, type = "Box-Pierce")
+Box.test (ar_1000, lag = 10, type = "Ljung-Box")
+```
